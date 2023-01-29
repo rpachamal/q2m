@@ -211,7 +211,7 @@ module.exports = function(query, options) {
     options = options || {}
     options.keywords = options.keywords || {}
 
-    defaultKeywords = {fields:'fields', omit:'omit', sort:'sort', offset:'offset', limit:'limit'}
+    defaultKeywords = {fields:'projection', omit:'omit', sort:'sort', offset:'offset', limit:'limit'}
     options.keywords = Object.assign(defaultKeywords, options.keywords)
     ignoreKeywords = [options.keywords.fields, options.keywords.omit, options.keywords.sort, options.keywords.offset, options.keywords.limit]
 
