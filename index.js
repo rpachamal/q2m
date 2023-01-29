@@ -3,16 +3,16 @@ var iso8601 = require('./lib/iso8601-regex')
 
 // Convert comma separated list to a mongo projection.
 // for example f('field1,field2,field3') -> {field1:true,field2:true,field3:true}
-function fieldsToMongo(fields) {
-    if (!fields) return null
+function projectionToMongo(projection) {
+    if (!projection) return null
     var hash = {}
-    fields.split(',').forEach(function(field) {
+    projection.split(',').forEach(function(field) {
         hash[field.trim()] = 1
     })
     return hash
 }
 
-// Convert comma separated list to a mongo projection which specifies fields to omit.
+// Convert comma separated list to a mongo projection which specifies projection to omit.
 // for example f('field2') -> {field2:false}
 function omitFieldsToMongo(omitFields) {
     if (!omitFields) return null
@@ -180,19 +180,19 @@ function queryCriteriaToMongo(query, options) {
 }
 
 // Convert query parameters to a mongo query options.
-// for example {fields:'a,b',offset:8,limit:16} becomes {fields:{a:true,b:true},skip:8,limit:16}
+// for example {projection:'a,b',offset:8,limit:16} becomes {projection:{a:true,b:true},skip:8,limit:16}
 function queryOptionsToMongo(query, options) {
     var hash = {},
-        fields = fieldsToMongo(query[options.keywords.fields]),
+        projection = projectionToMongo(query[options.keywords.projection]),
         omitFields = omitFieldsToMongo(query[options.keywords.omit]),
         sort = sortToMongo(query[options.keywords.sort]),
         maxLimit = options.maxLimit || 9007199254740992,
         limit = options.maxLimit || 0
 
-    if (fields) hash.fields = fields
-    // omit intentionally overwrites fields if both have been specified in the query
+    if (projection) hash.projection = projection
+    // omit intentionally overwrites projection if both have been specified in the query
     // mongo does not accept mixed true/fals field specifiers for projections
-    if (omitFields) hash.fields = omitFields
+    if (omitFields) hash.projection = omitFields
     if (sort) hash.sort = sort
 
     if (query[options.keywords.offset]) hash.skip = Number(query[options.keywords.offset])
@@ -211,9 +211,9 @@ module.exports = function(query, options) {
     options = options || {}
     options.keywords = options.keywords || {}
 
-    defaultKeywords = {fields:'projection', omit:'omit', sort:'sort', offset:'offset', limit:'limit'}
+    defaultKeywords = {projection:'projection', omit:'omit', sort:'sort', offset:'offset', limit:'limit'}
     options.keywords = Object.assign(defaultKeywords, options.keywords)
-    ignoreKeywords = [options.keywords.fields, options.keywords.omit, options.keywords.sort, options.keywords.offset, options.keywords.limit]
+    ignoreKeywords = [options.keywords.projection, options.keywords.omit, options.keywords.sort, options.keywords.offset, options.keywords.limit]
 
     if (!options.ignore) {
         options.ignore = []
